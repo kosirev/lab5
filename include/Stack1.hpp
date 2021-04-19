@@ -22,48 +22,40 @@ class Node
 };
 
 template <typename T>
-class Stack1 {
- private:
-  struct Node {
-    explicit Node(T data_ = T(), Node *pPast_ = nullptr) {
-      data = data_;
-      pPast = pPast_;
-    }
-
-    Node *pPast;
-    T data;
-  }* pHead;
-
+class Stack1
+{
  public:
-  void push(T &value) {
-    pHead = new Node(std::move(value), std::move(pHead));
+  void push(T&& value){
+    if (!pHead){
+      pHead = new Node<T>(std::move(value));
+    } else {
+      pHead = new Node<T>(std::move(value), std::move(pHead));
+    }
   };
-  void push(const T &&value) {
-    pHead = new Node(value, std::move(pHead));
+  void push(const T& value) {
+    if (!pHead){
+      pHead = new Node<T>(value);
+    } else {
+      pHead = new Node<T>(value, pHead);
+    }
   };
-
-  void pop() {
-    Node *pTemp = pHead->pPast;
+  void pop(){
+    Node<T> *pTemp = pHead->get_pointer_past();
     delete pHead;
     pHead = pTemp;
   };
+  const T& head() const{return pHead->get_data();};
 
-  [[nodiscard]] T &head() const { return pHead->data; };
-
-  Stack1() : pHead{} {}
-
-  explicit Stack1(const T &value) : pHead{new Node(value)} {}
-
-  explicit Stack1(T &&value) : pHead{new Node(std::move(value))} {}
-
-  Stack1(const Stack1 &) = delete;
-
-  Stack1 operator=(const Stack1 &) = delete;
-
-  ~Stack1() {
-    while (pHead) {
+  Stack1(){pHead = nullptr;}
+  Stack1(const Stack1&) = delete;
+  Stack1 operator=(const Stack1&) = delete;
+  ~Stack1(){
+    while(pHead){
       pop();
     }
   }
+
+ private:
+  Node<T> *pHead;
 };
 #endif // INCLUDE_HEADER_HPP_
